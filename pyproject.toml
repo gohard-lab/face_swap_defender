@@ -1,0 +1,17 @@
+[project]
+name = "face-swap-defender"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "opencv-python>=4.8.0",
+    "insightface>=0.7.3",
+    "onnxruntime-gpu==1.19.2",  # 🔥 CUDA 12 호환 황금 안정판
+    "supabase>=2.3.0",
+    "pydantic>=2.5.0",
+    "requests>=2.31.0",
+    "torch>=2.12.1",
+    "streamlit>=1.58.0",
+    "streamlit-javascript>=0.1.5",
+]
