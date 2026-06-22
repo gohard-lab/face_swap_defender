@@ -9,6 +9,7 @@ wheels/
 src/inswapper_128.onnx
 src/face_swap_defender.egg-info
 CAPCUT/
+.streamlit/
 
 # Virtual environments
 .venv
