@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 import torch
 import insightface
+import streamlit as st
 from insightface.app import FaceAnalysis
 
 
@@ -112,19 +113,85 @@ def execute_face_swap(source_img_path, target_img_path, output_path, model_path)
     )
 
 
+@st.cache_resource
+def load_face_models(model_path):
+    """Cache the heavy AI models to prevent memory leaks and slow reloads"""
+    analyzer = FaceAnalysis(name='buffalo_l', providers=['CUDAExecutionProvider', 'CPUExecutionProvider'])
+    analyzer.prepare(ctx_id=0, det_size=(640, 640))
+    swapper = insightface.model_zoo.get_model(model_path, download=False)
+    return analyzer, swapper
+
+def main():
+    st.title("🎭 2-in-1 딥페이크 사진 합성")
+    st.write("소스와 타겟 이미지를 업로드하여 실시간 딥페이크 결과를 확인하세요.")
+
+    # Track application opening
+    log_app_usage("face_swap_defender_ui", "app_opened", details=json.dumps({"status": "active"}))
+
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    parent_dir = os.path.dirname(current_dir)  # 한 단계 위인 src 폴더를 가리킵니다.
+    model_file = os.path.join(parent_dir, "inswapper_128.onnx")
+
+    # Layout for image uploads
+    col_up1, col_up2 = st.columns(2)
+    with col_up1:
+        source_file = st.file_uploader("1. 소스 이미지 (내 얼굴)", type=["jpg", "jpeg", "png"])
+    with col_up2:
+        target_file = st.file_uploader("2. 타겟 이미지 (합성할 대상)", type=["jpg", "jpeg", "png"])
+
+    if source_file is not None and target_file is not None:
+        # Load cached AI models securely
+        face_analyzer, swapper = load_face_models(model_file)
+
+        # Convert uploaded bytes into OpenCV format cleanly
+        src_bytes = np.asarray(bytearray(source_file.read()), dtype=np.uint8)
+        source_img = cv2.imdecode(src_bytes, cv2.IMREAD_COLOR)
+
+        tgt_bytes = np.asarray(bytearray(target_file.read()), dtype=np.uint8)
+        target_img = cv2.imdecode(tgt_bytes, cv2.IMREAD_COLOR)
+
+        if st.button("🚀 딥페이크 사진 합성"):
+            with st.spinner("인공지능 모델 가동 중... (GPU Mode Active)"):
+                # Extract landmarks
+                source_faces = face_analyzer.get(source_img)
+                target_faces = face_analyzer.get(target_img)
+
+                if not source_faces or not target_faces:
+                    st.error("이미지에서 얼굴을 감지하지 못했습니다.")
+                    return
+
+                # Core face swap pipeline execution
+                result_img = swapper.get(target_img, target_faces[0], source_faces[0], paste_back=True)
+                
+                # Apply the forensic safeguard layers securely
+                safe_result_img = add_invisible_watermark(result_img)
+
+                # Track successful execution inside the database
+                log_app_usage(
+                    "face_swap_defender_ui", 
+                    "swap_completed", 
+                    details=json.dumps({"source": source_file.name, "target": target_file.name})
+                )
+
+            # Display the requested three-column comparative dashboard
+            st.write("### 📊 실시간 프로세스 모니터링 (SOURCE / TARGET / RESULT)")
+            col1, col2, col3 = st.columns(3)
+
+            with col1:
+                st.image(source_img, channels="BGR", caption="[SOURCE] 소스 이미지")
+            with col2:
+                st.image(target_img, channels="BGR", caption="[TARGET] 타겟 이미지")
+            with col3:
+                st.image(safe_result_img, channels="BGR", caption="[RESULT] 방어막 주입 결과")
+
+                # Provide seamless download option for viewers
+                _, img_encoded = cv2.imencode('.jpg', safe_result_img)
+                st.download_button(
+                    label="💾 결과물 안전하게 다운로드",
+                    data=img_encoded.tobytes(),
+                    file_name="swapped_result.jpg",
+                    mime="image/jpeg"
+                )
+
 if __name__ == "__main__":
-    # Resolve root directory based on the running environment
-    if IS_COLAB:
-        current_dir = "/content"
-        print("[INFO] Running on Google Colab environment.")
-    else:
-        current_dir = os.path.dirname(os.path.abspath(__file__))
-
-    # Construct absolute paths for resources cleanly
-    source_file = os.path.join(current_dir, "source.jpg")
-    target_file = os.path.join(current_dir, "target.jpg")
-    output_file = os.path.join(current_dir, "swapped_result.jpg")
-    model_file = os.path.join(current_dir, "inswapper_128.onnx")
-
-    # Trigger core pipeline
-    execute_face_swap(source_file, target_file, output_file, model_file)
+    main()
