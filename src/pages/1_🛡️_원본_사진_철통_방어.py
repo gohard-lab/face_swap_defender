@@ -91,7 +91,7 @@ def execute_source_defense(source_img_path, output_path):
 
     # Track the initialization of the defense app
     log_app_usage(
-        "source_defender",
+        "face_swap_defender",
         "defense_started",
         details=json.dumps({
             "source_file": os.path.basename(source_img_path),
@@ -109,7 +109,7 @@ def execute_source_defense(source_img_path, output_path):
     if source_img is None:
         error_msg = "Failed to read the source image. Check file path."
         print(f"[ERROR] {error_msg}")
-        log_app_usage("source_defender", "defense_failed", details=json.dumps({"reason": error_msg}))
+        log_app_usage("face_swap_defender", "defense_failed", details=json.dumps({"reason": error_msg}))
         return
 
     # Extract face embedded landmarks to locate the target defense area
@@ -118,7 +118,7 @@ def execute_source_defense(source_img_path, output_path):
     if not source_faces:
         error_msg = "No faces detected in the provided source image."
         print(f"[ERROR] {error_msg}")
-        log_app_usage("source_defender", "defense_failed", details=json.dumps({"reason": error_msg}))
+        log_app_usage("face_swap_defender", "defense_failed", details=json.dumps({"reason": error_msg}))
         return
 
     source_face = source_faces[0]
@@ -137,7 +137,7 @@ def execute_source_defense(source_img_path, output_path):
 
     # Track successful database logging
     log_app_usage(
-        "source_defender",
+        "face_swap_defender",
         "defense_completed",
         details=json.dumps({
             "status": "success",
@@ -159,7 +159,7 @@ def main():
 
     # 1. 화면 오픈 로그를 데이터 트래커에 JSON 형식으로 남깁니다.
     log_app_usage(
-        "source_defender_ui", 
+        "face_swap_defender", 
         "page_opened", 
         details=json.dumps({"interface": "streamlit_web", "status": "active"})
     )
@@ -173,7 +173,7 @@ def main():
     if uploaded_file is not None:
         # 파일 업로드 흔적 추적 로그 기록
         log_app_usage(
-            "source_defender_ui", 
+            "face_swap_defender", 
             "file_uploaded", 
             details=json.dumps({"file_name": uploaded_file.name, "file_size": uploaded_file.size})
         )
@@ -187,7 +187,7 @@ def main():
 
         if not faces:
             st.error("이미지에서 인식 가능한 얼굴을 찾을 수 없습니다. 다른 사진으로 시도해 주세요.")
-            log_app_usage("source_defender_ui", "processing_failed", details=json.dumps({"reason": "no_face_detected"}))
+            log_app_usage("face_swap_defender", "processing_failed", details=json.dumps({"reason": "no_face_detected"}))
             return
 
         # 방어 파이프라인 실시간 가동
@@ -200,7 +200,7 @@ def main():
             
             # 처리 완료 흔적 추적 로그 기록
             log_app_usage(
-                "source_defender_ui", 
+                "face_swap_defender", 
                 "defense_applied", 
                 details=json.dumps({"status": "success", "detected_faces": len(faces)})
             )
@@ -222,7 +222,7 @@ def main():
                 data=img_encoded.tobytes(),
                 file_name="protected_stealth_image.jpg",
                 mime="image/jpeg",
-                on_click=lambda: log_app_usage("source_defender_ui", "download_clicked", details=json.dumps({"action": "download"}))
+                on_click=lambda: log_app_usage("face_swap_defender", "download_clicked", details=json.dumps({"action": "download"}))
             )
 
 if __name__ == "__main__":

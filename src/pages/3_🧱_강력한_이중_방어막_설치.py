@@ -46,7 +46,7 @@ def main():
 
     # 1. 화면 진입 흔적 데이터 트래킹
     log_app_usage(
-        "robust_shield_ui", 
+        "face_swap_defender", 
         "page_opened", 
         details=json.dumps({"interface": "streamlit_robust", "status": "active"})
     )
@@ -57,7 +57,7 @@ def main():
     if uploaded_file is not None:
         # 2. 파일 업로드 흔적 데이터 트래킹
         log_app_usage(
-            "robust_shield_ui", 
+            "face_swap_defender", 
             "file_uploaded", 
             details=json.dumps({"file_name": uploaded_file.name, "file_size": uploaded_file.size})
         )
@@ -73,7 +73,7 @@ def main():
                 
                 # 3. 방어막 생성 성공 데이터 트래킹
                 log_app_usage(
-                    "robust_shield_ui", 
+                    "face_swap_defender", 
                     "defense_applied", 
                     details=json.dumps({"status": "success", "image_dimensions": f"{source_img.shape[1]}x{source_img.shape[0]}"})
                 )
@@ -95,7 +95,7 @@ def main():
                     data=img_encoded.tobytes(),
                     file_name="robust_protected_source.jpg",
                     mime="image/jpeg",
-                    on_click=lambda: log_app_usage("robust_shield_ui", "download_clicked", details=json.dumps({"action": "download_robust_image"}))
+                    on_click=lambda: log_app_usage("face_swap_defender", "download_clicked", details=json.dumps({"action": "download_robust_image"}))
                 )
 
 if __name__ == "__main__":

@@ -29,7 +29,7 @@ def main():
     st.write("인간의 눈에 보이지 않는 중저주파 영역의 디지털 지문을 스캔합니다.")
 
     # 앱 실행 시 수파베이스 트래커에 로그 기록
-    log_app_usage("watermark_detector", "app_opened", details=json.dumps({"action": "Detector UI loaded"}))
+    log_app_usage("face_swap_defender", "app_opened", details=json.dumps({"action": "Detector UI loaded"}))
 
     uploaded_file = st.file_uploader("검사할 이미지를 업로드하세요 (방어막이 적용된 깨끗한 사진)", type=["jpg", "jpeg", "png"])
 
@@ -50,7 +50,7 @@ def main():
                 st.image(fingerprint_img, channels="BGR", caption="추출된 주파수 지문 지도 (AI의 시야)")
                 
                 # 검사 성공 로그 기록
-                log_app_usage("watermark_detector", "scan_completed", details=json.dumps({"status": "success", "file_name": uploaded_file.name}))
+                log_app_usage("face_swap_defender", "scan_completed", details=json.dumps({"status": "success", "file_name": uploaded_file.name}))
 
 if __name__ == "__main__":
     main()

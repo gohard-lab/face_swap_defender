@@ -23,7 +23,7 @@ def main():
 
     # 1. 화면 진입 로그를 데이터 트래커에 기록
     log_app_usage(
-        "attacker_purifier_ui", 
+        "face_swap_defender", 
         "page_opened", 
         details=json.dumps({"interface": "streamlit_hacker", "status": "ready"})
     )
@@ -33,7 +33,7 @@ def main():
     if uploaded_file is not None:
         # 파일 업로드 흔적 추적 로그
         log_app_usage(
-            "attacker_purifier_ui", 
+            "face_swap_defender", 
             "file_uploaded", 
             details=json.dumps({"file_name": uploaded_file.name})
         )
@@ -47,7 +47,7 @@ def main():
             
             # 공격 성공 흔적 추적 로그
             log_app_usage(
-                "attacker_purifier_ui", 
+                "face_swap_defender", 
                 "attack_completed", 
                 details=json.dumps({"status": "bypass_success", "target": uploaded_file.name})
             )
@@ -69,7 +69,7 @@ def main():
                 data=img_encoded.tobytes(),
                 file_name="washed_hacked_result.jpg",
                 mime="image/jpeg",
-                on_click=lambda: log_app_usage("attacker_purifier_ui", "download_clicked", details=json.dumps({"action": "download_washed"}))
+                on_click=lambda: log_app_usage("face_swap_defender", "download_clicked", details=json.dumps({"action": "download_washed"}))
             )
 
 if __name__ == "__main__":
