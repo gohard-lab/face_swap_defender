@@ -126,7 +126,7 @@ def main():
     st.write("소스와 타겟 이미지를 업로드하여 실시간 딥페이크 결과를 확인하세요.")
 
     # Track application opening
-    log_app_usage("face_swap_defender_ui", "app_opened", details=json.dumps({"status": "active"}))
+    log_app_usage("face_swap_defender", "app_opened", details=json.dumps({"status": "active"}))
 
     current_dir = os.path.dirname(os.path.abspath(__file__))
     parent_dir = os.path.dirname(current_dir)  # 한 단계 위인 src 폴더를 가리킵니다.
@@ -168,7 +168,7 @@ def main():
 
                 # Track successful execution inside the database
                 log_app_usage(
-                    "face_swap_defender_ui", 
+                    "face_swap_defender", 
                     "swap_completed", 
                     details=json.dumps({"source": source_file.name, "target": target_file.name})
                 )
