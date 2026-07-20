@@ -115,13 +115,22 @@ def execute_face_swap(source_img_path, target_img_path, output_path, model_path)
 
 @st.cache_resource
 def load_face_models(model_path):
-    """메모리 누수 및 재로딩 지연 방지를 위해 무거운 AI 모델 캐싱"""
-    # 클라우드 환경 대응을 위해 절대 경로로 안전하게 변환
+    """AI 모델 파일 경로 검증 및 로드 수행"""
+    # 절대 경로 변환으로 위치 추적 명확화
     if not os.path.isabs(model_path):
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        # src/pages/ 폴더 위치를 기준으로 최상위 프로젝트 루트 경로 계산
+        # src/pages/ 기준으로 프로젝트 최상위 루트 경로 계산
         base_root = os.path.dirname(os.path.dirname(current_dir))
-        model_path = os.path.join(base_root, model_path)
+        model_path = os.path.abspath(os.path.join(base_root, model_path))
+
+    # 화면에 실제 탐색 경로와 폴더 상태를 디버깅 정보로 출력
+    if not os.path.exists(model_path):
+        st.error(f"서버에서 모델 파일을 찾지 못함: {model_path}")
+        parent_dir = os.path.dirname(model_path)
+        if os.path.exists(parent_dir):
+            st.info(f"해당 폴더 내 실제 파일 목록: {os.listdir(parent_dir)}")
+        else:
+            st.warning(f"상위 폴더 자체가 존재하지 않음: {parent_dir}")
 
     analyzer = FaceAnalysis(name='buffalo_l', providers=['CUDAExecutionProvider', 'CPUExecutionProvider'])
     analyzer.prepare(ctx_id=0, det_size=(640, 640))
