@@ -116,18 +116,15 @@ def execute_face_swap(source_img_path, target_img_path, output_path, model_path)
 
 @st.cache_resource
 def load_face_models(model_path):
-    """AI 모델 파일의 서버 부재 시 자동 다운로드 및 로드 수행"""
+    """AI 모델 파일의 서버 부재 시 자동 다운로드 및 메모리 최적화 로드 수행"""
     if not os.path.isabs(model_path):
         current_dir = os.path.dirname(os.path.abspath(__file__))
         base_root = os.path.dirname(os.path.dirname(current_dir))
         model_path = os.path.abspath(os.path.join(base_root, model_path))
 
-    # 깃허브 용량 제한으로 인한 미업로드 대응 자동 다운로드 로직
     if not os.path.exists(model_path):
         st.info("서버에 모델 파일이 없어 원격 다운로드를 시작합니다. 대용량 파일이므로 약 1~2분 소요됩니다.")
         os.makedirs(os.path.dirname(model_path), exist_ok=True)
-        
-        # 검증된 허깅페이스 공식 미러 다운로드 주소 활용
         url = "https://huggingface.co/ezioruan/inswapper_128.onnx/resolve/main/inswapper_128.onnx"
         try:
             urllib.request.urlretrieve(url, model_path)
@@ -135,7 +132,13 @@ def load_face_models(model_path):
         except Exception as e:
             st.error(f"다운로드 진행 중 예외 발생: {e}")
 
-    analyzer = FaceAnalysis(name='buffalo_l', providers=['CUDAExecutionProvider', 'CPUExecutionProvider'])
+    # 메모리 절약을 위해 불필요한 나이/성별/인식 모듈을 배제하고 오직 탐지만 활성화
+    # 클라우드 환경 특성에 맞춰 CPU 전용 프로바이더로 고정 효율화
+    analyzer = FaceAnalysis(
+        name='buffalo_l', 
+        allowed_modules=['detection'], 
+        providers=['CPUExecutionProvider']
+    )
     analyzer.prepare(ctx_id=0, det_size=(640, 640))
     swapper = insightface.model_zoo.get_model(model_path, download=False)
     return analyzer, swapper
