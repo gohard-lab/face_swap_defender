@@ -74,8 +74,16 @@ def apply_frequency_watermark(image, secret_text="PROVENANCE"):
     
     # 주파수 공간에 텍스트를 각인할 때 강도를 255에서 15.0으로 대폭 낮춰 스텔스 상태를 유지합니다.
     h, w = dct_coefficients.shape
-    cv2.putText(dct_coefficients, secret_text, (int(w*0.3), int(h*0.5)), 
-                cv2.FONT_HERSHEY_SIMPLEX, 0.5, (15.0,), 1, cv2.LINE_AA)
+    
+    # 텍스트를 임시로 그려낼 동일 크기의 8비트 단일 채널 마스크 생성
+    text_mask = np.zeros((h, w), dtype=np.uint8)
+    
+    # 마스크 위에 흰색(255)으로 워터마크 글자 각인
+    cv2.putText(text_mask, secret_text, (int(w*0.3), int(h*0.5)), 
+                cv2.FONT_HERSHEY_SIMPLEX, 0.5, 255, 1, cv2.LINE_AA)
+    
+    # 글자가 그려진 위치(255인 곳)의 주파수 계수에만 대표님이 의도하신 강도 15.0을 수학적으로 더함
+    dct_coefficients[text_mask > 0] += 15.0
     
     idct_y = cv2.idct(dct_coefficients)
     
