@@ -1,3 +1,21 @@
+import sys
+import os
+import subprocess
+import streamlit as st
+
+# 1. 스트림릿 리눅스 서버의 APT 의존성 버그를 우회하기 위한 자가 치유(Self-Healing) 로직
+if sys.platform.startswith("linux"):
+    try:
+        import cv2
+    except ImportError:
+        with st.spinner("클라우드 서버 전용 그래픽 모듈로 강제 최적화 중입니다... (최초 1회만 실행)"):
+            # 인사이트페이스가 강제로 끌고 온 GUI 패키지들을 가상환경에서 강제 삭제
+            subprocess.run([sys.executable, "-m", "pip", "uninstall", "-y", "opencv-python", "opencv-python-headless"])
+            # 순수 서버용 헤드리스 패키지만 단독으로 재설치하여 충돌 원천 차단
+            subprocess.run([sys.executable, "-m", "pip", "install", "opencv-python-headless"])
+        st.success("의존성 복구 완료! 앱을 재시작합니다.")
+        st.rerun()
+        
 import streamlit as st
 import json
 from tracker_hub import log_app_usage
