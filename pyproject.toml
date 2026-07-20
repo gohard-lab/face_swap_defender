@@ -15,4 +15,6 @@ dependencies = [
     "streamlit>=1.58.0",
     "streamlit-javascript>=0.1.5",
     "torchvision>=0.27.1",
-]
+    "tracker_hub @ git+https://github.com/gohard-lab/tracker-hub.git",
+     "opencv-python-headless",
+]  
