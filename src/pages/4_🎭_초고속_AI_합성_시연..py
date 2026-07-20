@@ -6,6 +6,7 @@ import numpy as np
 import torch
 import insightface
 import streamlit as st
+import urllib.request
 from insightface.app import FaceAnalysis
 
 
@@ -115,22 +116,24 @@ def execute_face_swap(source_img_path, target_img_path, output_path, model_path)
 
 @st.cache_resource
 def load_face_models(model_path):
-    """AI 모델 파일 경로 검증 및 로드 수행"""
-    # 절대 경로 변환으로 위치 추적 명확화
+    """AI 모델 파일의 서버 부재 시 자동 다운로드 및 로드 수행"""
     if not os.path.isabs(model_path):
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        # src/pages/ 기준으로 프로젝트 최상위 루트 경로 계산
         base_root = os.path.dirname(os.path.dirname(current_dir))
         model_path = os.path.abspath(os.path.join(base_root, model_path))
 
-    # 화면에 실제 탐색 경로와 폴더 상태를 디버깅 정보로 출력
+    # 깃허브 용량 제한으로 인한 미업로드 대응 자동 다운로드 로직
     if not os.path.exists(model_path):
-        st.error(f"서버에서 모델 파일을 찾지 못함: {model_path}")
-        parent_dir = os.path.dirname(model_path)
-        if os.path.exists(parent_dir):
-            st.info(f"해당 폴더 내 실제 파일 목록: {os.listdir(parent_dir)}")
-        else:
-            st.warning(f"상위 폴더 자체가 존재하지 않음: {parent_dir}")
+        st.info("서버에 모델 파일이 없어 원격 다운로드를 시작합니다. 대용량 파일이므로 약 1~2분 소요됩니다.")
+        os.makedirs(os.path.dirname(model_path), exist_ok=True)
+        
+        # 검증된 허깅페이스 공식 미러 다운로드 주소 활용
+        url = "https://huggingface.co/ezioruan/inswapper_128.onnx/resolve/main/inswapper_128.onnx"
+        try:
+            urllib.request.urlretrieve(url, model_path)
+            st.success("모델 파일 서버 안전 다운로드 완료")
+        except Exception as e:
+            st.error(f"다운로드 진행 중 예외 발생: {e}")
 
     analyzer = FaceAnalysis(name='buffalo_l', providers=['CUDAExecutionProvider', 'CPUExecutionProvider'])
     analyzer.prepare(ctx_id=0, det_size=(640, 640))
