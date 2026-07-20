@@ -136,7 +136,7 @@ def load_face_models(model_path):
     # 클라우드 환경 특성에 맞춰 CPU 전용 프로바이더로 고정 효율화
     analyzer = FaceAnalysis(
         name='buffalo_l', 
-        allowed_modules=['detection'], 
+        allowed_modules=['detection', 'recognition'], 
         providers=['CPUExecutionProvider']
     )
     analyzer.prepare(ctx_id=0, det_size=(640, 640))
