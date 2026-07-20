@@ -115,7 +115,14 @@ def execute_face_swap(source_img_path, target_img_path, output_path, model_path)
 
 @st.cache_resource
 def load_face_models(model_path):
-    """Cache the heavy AI models to prevent memory leaks and slow reloads"""
+    """메모리 누수 및 재로딩 지연 방지를 위해 무거운 AI 모델 캐싱"""
+    # 클라우드 환경 대응을 위해 절대 경로로 안전하게 변환
+    if not os.path.isabs(model_path):
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        # src/pages/ 폴더 위치를 기준으로 최상위 프로젝트 루트 경로 계산
+        base_root = os.path.dirname(os.path.dirname(current_dir))
+        model_path = os.path.join(base_root, model_path)
+
     analyzer = FaceAnalysis(name='buffalo_l', providers=['CUDAExecutionProvider', 'CPUExecutionProvider'])
     analyzer.prepare(ctx_id=0, det_size=(640, 640))
     swapper = insightface.model_zoo.get_model(model_path, download=False)
