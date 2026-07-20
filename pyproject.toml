@@ -5,9 +5,8 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "opencv-python>=4.8.0",
     "insightface>=0.7.3",
-    "onnxruntime-gpu==1.19.2",  # 🔥 CUDA 12 호환 황금 안정판
+    "onnxruntime==1.19.2",  # 클라우드 CPU 환경 구동을 위한 표준 런타임 변경
     "supabase>=2.3.0",
     "pydantic>=2.5.0",
     "requests>=2.31.0",
@@ -16,6 +15,5 @@ dependencies = [
     "streamlit-javascript>=0.1.5",
     "torchvision>=0.27.1",
     "tracker_hub @ git+https://github.com/gohard-lab/tracker-hub.git",
-    "opencv-python-headless",
-    "opencv-python",
-]  
+    "opencv-python-headless",  # 서버 환경 전용 단일 패키지 고정
+]
